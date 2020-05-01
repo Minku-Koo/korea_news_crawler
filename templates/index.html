@@ -1,0 +1,407 @@
+﻿<!doctype html>
+<html>
+<!--made by Koo Minku-->
+<!--Developer Email : corleone@kakao.com-->
+<!--"Searching Korean News" Web Site-->
+<!--Server : flask (python)-->
+<!--crawling :  python selenium, beautifulsoup4-->
+<!--DB : MariaDB-->
+<!--project start 2020.04.14-->
+<head>
+<title>My News</title>
+<meta charset="utf-8">
+<!--CSS 파일 불러오기-->
+<link rel="stylesheet" 
+  href="{{ url_for('static', filename='news_css.css') }}">
+</head>
+
+<body>
+	<h1>원하는 뉴스를 검색하세요.</h1>
+	<form class="conditions" name="conditions" method="POST" action="/news/s" autocomplete="off">
+		<!--키워드 입력 박스-->
+		<div class = "inputBox"> <!--입력 박스 테두리-->
+			<input type="text" name="inputKeyword" class="inputKeyword"
+			placeholder="검색할 키워드를 입력하세요.">
+		</div>
+		
+		<!--조건 입력 박스-->
+		<div class="conditionBox" style="min-width: 360px;">
+			<span>포함 단어 </span>
+			<input type="text" name="includeKeyword" class="includeKeyword">
+			
+			<br>
+			<span style="font-size: 11px;">
+				단어가 많으면 ,(콤마)로 구분해주세요. (최대 3단어)
+			</span>
+			
+			<!--포함 단어의 포함 위치-->
+			<div class="includeCheckDiv" style="margin: 10px 0;">
+				<span>포함 위치 </span>
+				<input type="radio" name="include_position" class="includeRadio" value="title">
+				<span>제목</span>
+				<!--
+				<input type="checkbox" name="include_content" class="includeCheckbox">
+				<span>본문</span>-->
+				
+				<input type="radio" name="include_position" class="includeRadio" value="both" checked>
+				<span>제목+본문</span>
+			</div>
+			
+			<!--기간 설정-->
+			<span>기간 설정</span>
+			<input type="radio" name="lastPeriod" class="dateRadio" value="day">
+			<span>하루</span>
+			<input type="radio" name="lastPeriod" class="dateRadio" value="week">
+			<span>일주일</span>
+			<input type="radio" name="lastPeriod" class="dateRadio" value="month" checked>
+			<span>한 달</span>
+			<input type="radio" name="lastPeriod" class="dateRadio" value="mydate">
+			<span>직접 입력 </span>
+			<br>
+			
+			<input type="date" name="startDate" class="setDate" id="startDate">
+			~
+			<input type="date" name="endDate" class="setDate" id="endDate">
+			
+			<!--이미지 필수 포함 여부 checkbox-->
+			<div style="margin-top: 10px;">
+				<span>이미지 필수 포함 </span>
+				<input type="checkbox" name="imgExist" class="imgExist" >
+				<input type="text" name="imgExist_value" class="imgExist_value" 
+					value="off" style="display: none;">
+			</div>
+			
+			<div class="bottomBox">
+				<!--언론사 선택 버튼
+				<button name="selectJournal" class="selectJournal" onclick="journalClick()">
+				언론사 선택
+				</button>-->
+				
+				<!--검색 버튼 -->
+				<button type="submit" name="search_btn" class="search_btn" >
+				검 색
+				</button>
+			</div>
+			
+			<input id="sort_value" style="display:none;" name="sort_value" value="yng">
+		</form>
+	</div>
+	
+	{% if condList != [] %}
+	<div class="result_cond">
+			<span> 키워드 : {{condList[0]}} </span><br>
+			<span> 포함 단어 : {{condList[3]}} </span><br>
+			<span> 포함 위치 : {{condList[4]}} </span><br>
+			<span> 기 간 : {{condList[1]}} ~ {{condList[2]}} </span><br>
+			<span> 이미지 포함 여부 : {{condList[5]}} </span>
+	</div>
+	
+	
+	
+	<!--언론사 목록 출력 박스
+	<table class="journalTable" style="display: none;">
+		<tr>
+			<td>
+				<button name="all_check" id="journal_all" 
+					value="on" class="journalCheckbox" checked="checked">
+				전체 선택
+				</button>
+			</td>
+		</tr>
+		
+		<tr>
+			<td>
+				<input type="checkbox" name="1" class="journalCheckbox" checked="checked">
+				1
+			</td>
+			<td>
+				<input type="checkbox" name="2" class="journalCheckbox" checked="checked">
+				2
+			</td>
+			<td>
+				<input type="checkbox" name="3" class="journalCheckbox" checked="checked">
+				3
+			</td>
+			<td>
+				<input type="checkbox" name="4" class="journalCheckbox" checked="checked">
+				4
+			</td>
+			<td>
+				<input type="checkbox" name="1" class="journalCheckbox" checked="checked">
+				1
+			</td>
+		</tr>
+		
+		<tr>
+			<td>
+				<input type="checkbox" name="donga" class="journalCheckbox" checked="checked">
+				동아일보
+			</td>
+			<td>
+				<input type="checkbox" name="chosun" class="journalCheckbox" checked="checked">
+				조선일보
+			</td>
+			<td>
+				<input type="checkbox" name="joongang" class="journalCheckbox" checked="checked">
+				중앙일보
+			</td>
+			<td>
+				<input type="checkbox" name="kookmin" class="journalCheckbox" checked="checked">
+				국민일보
+			</td>
+			<td>
+				<input type="checkbox" name="newsis" class="journalCheckbox" checked="checked">
+				뉴시스
+			</td>
+		</tr>
+		
+		<tr>
+			<td>
+				<input type="checkbox" name="1" class="journalCheckbox" checked="checked">
+				1
+			</td>
+			<td>
+				<input type="checkbox" name="2" class="journalCheckbox" checked="checked">
+				2
+			</td>
+			<td>
+				<input type="checkbox" name="3" class="journalCheckbox" checked="checked">
+				3
+			</td>
+			<td>
+				<input type="checkbox" name="4" class="journalCheckbox" checked="checked">
+				4
+			</td>
+			<td>
+				<input type="checkbox" name="1" class="journalCheckbox" checked="checked">
+				1
+			</td>
+		</tr>
+		
+		<tr>
+			<td>
+				<input type="checkbox" name="1" class="journalCheckbox" checked="checked">
+				1
+			</td>
+			<td>
+				<input type="checkbox" name="2" class="journalCheckbox" checked="checked">
+				2
+			</td>
+			<td>
+				<input type="checkbox" name="3" class="journalCheckbox" checked="checked">
+				3
+			</td>
+			<td>
+				<input type="checkbox" name="4" class="journalCheckbox" checked="checked">
+				4
+			</td>
+			<td>
+				<input type="checkbox" name="1" class="journalCheckbox" checked="checked">
+				1
+			</td>
+		</tr>
+		
+		
+	</table>-->
+	
+	<div style="height: 40px;">
+		<select name="article_sort" class="article_sort">
+			<option class="young" value="yng">최신순</option>
+			<option class="old" value="old">오래된순</option>
+		</select>
+		
+	</div>
+	{% endif %}
+	
+	{% if count!=0 %}
+		{% for num in range(10) %}
+		
+		{% if article_list[1][num]  %}
+		<div class="articleResultBox"> <!----여기는 기사 링크 달아주고 제목 출력-->
+			<a href={{ article_list[0][num] }} class="articleLink">
+				{{ article_list[1][num] }}
+			</a>
+			<form class="article_clean" name="article_clean" method="POST" action="/article">
+			<button type="submit" name="article_clean" value={{ article_list[0][num] }}>
+				view
+			</button>
+			<input name="url" style="display: none" value={{ article_list[0][num] }}>
+			</form>
+		</div>
+		{% endif %}
+		
+		{% endfor %}
+		
+		
+		
+		{% set page_n = ((page/10)|int) *10 %}
+		{% if page% 10 ==0  %}
+		{% set page_n = page_n-10 %}
+		{% endif %}
+		
+		
+		
+		{% for num in range(page_n+1, page_n+11) %}
+			{% if page_n >=10  and num==page_n+1%}
+			<button name="pageButton" class="pageButton" id="page_{{ num-1 }}">
+			<a href="/news/{{num-1}}_{{sort}}" class="page_" id="page_{{ num-1 }}"><</a>
+			</button>
+			{% endif %}
+			
+			{% if page_n+10 >= num and count >= num %}
+			<button name="pageButton" class="pageButton" >
+			<a href="/news/{{num}}_{{sort}}" class="page_" id="page_{{ num }}">{{ num }}</a>
+			</button>
+			{% endif %}
+			{% if num %10 ==0 and count > num %}
+			<button name="pageButton" class="pageButton" id="page_{{ num+1 }}">
+			<a href="/news/{{num+1}}_{{sort}}" class="page_" id="page_{{ num+1 }}">></a>
+			</button>
+			{% endif %}
+		{% endfor %}
+	
+	{% endif %}
+</body>
+
+<!--JQuery 불러오기-->
+<script type="text/javascript"
+src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js">
+</script>
+
+<script type = "text/javascript">
+
+// 언론사 목록 펼치고 접기
+function journalClick(){
+	if($(".journalTable").css("display") == "none"){  // 보여주기
+		$(".journalTable").css("display", "block");
+	}else{  // 숨기기
+		$(".journalTable").css("display", "none");
+	}
+}
+
+// 이미지 필수 포함 체크박스 -- 클릭하면 value 변경 on / off
+$(".imgExist").click( function(){
+    console.log('img exist click');
+	//체크 한 경우
+    if($(".imgExist").is(":checked") == true){
+		$(".imgExist_value").attr('value', 'on');
+	}else{  //체크 안 한 경우
+		$(".imgExist_value").attr('value', 'off');
+	}
+});
+
+// 시작할 때 불러오는 함수
+$(document).ready(function(){
+    
+	var msg = "{{warning}}";  // 경고 메시지 -- 초기값 ""
+	
+    if (msg != ""){  // 메시지가 초기값이 아닐 경우
+		alert(msg);   // 경고 메시지 출력
+		window.location.replace("/");  //메인 화면으로 이동
+	}
+	
+	var sort = "{{sort}}";
+	console.log("sort is "+sort);
+	if(sort=="old"){
+		$(".old").attr("selected", "selected");
+		$(".young").prop("selected", false);
+	}else{
+		$(".young").attr("selected", "selected");
+		$(".old").prop("selected", false)
+	}
+});
+
+//언론사 전체선택 버튼
+$("#journal_all").click( function(){
+    console.log('jourmal all check');
+	//전체 선택 해제
+    if($("#journal_all").attr('value') == "on"){
+		$(".journalCheckbox").prop('checked', false) ;  //전체 체크 해제하기
+		$(".journalCheckbox").attr('checked', false) ;
+		$("#journal_all").attr('value', 'off');  //버튼 value off로 변경
+	}else{  //전체 선택
+		$(".journalCheckbox").prop('checked', true) ;  //전체 체크하기
+		$(".journalCheckbox").attr('checked', true) ;
+		$("#journal_all").attr('value', 'on');  //버튼 value on으로 변경
+	}
+});
+
+//셀렉트 박스 (정렬) change event
+$(".article_sort").change(function(){
+	console.log("change");
+	var i=0;
+	var num = {{page}};
+	if(num%10==0){
+		num-=1;
+	}
+	var i=Number(num/10 )*10-1;
+	var until = Number(num/10 )*10;
+	
+	while(i<until+12){
+		console.log($("#page_"+(i).toString()).length);
+		console.log("id : "+"#page_"+(i).toString());
+		if ( $("#page_"+(i).toString()).length ==1 ){  //해당 태그가 존재하면
+			$("#page_"+(i).toString()).prop("href","/news/"+(i).toString()+("_"+$(this).val()));
+			
+		}
+		i++;
+	}
+	
+	var sort = "{{sort}}";
+	if(sort=="old"){
+		$(".old").attr("selected", "selected");
+		$(".young").prop("selected", false);
+	}else{
+		$(".young").attr("selected", "selected");
+		$(".old").prop("selected", false)
+	}
+	
+	//var link = $(".page_").attr("href").split("_")[0];
+	///$(".page_").prop("href", link +"_"+ ($(this).val()));
+	
+	$("#sort_value").text($(this).val()) ;
+	//console.log(link +"_"+ $(this).val());
+});
+
+
+
+//페이지 번호 클릭 이벤트
+/*
+$(".pageButton").click(function(){
+	var page_value = $(this).attr('id');
+	if(page_value == "next"){
+		console.log("1");
+	}else if(page_value == "prev"){
+		console.log("2");
+	}else{
+	    var page_num = Number(page_value.split("_")[1]);
+		console.log("4");
+	}
+	
+
+});
+
+
+
+$('.article_clean').click(function (){
+	var link = $(this).val();
+	alert(link);
+	$.ajax({
+		url:'/article',
+		type: 'POST',
+		dataType: 'json',
+		data: {url: link},
+
+		success : function(data){
+			console.log("success");
+			document.write(response); 
+		}
+		});
+
+});*/
+</script>
+
+
+
+</html>
+
