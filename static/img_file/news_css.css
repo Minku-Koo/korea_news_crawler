@@ -1,0 +1,119 @@
+﻿/* my news css  file*/
+
+body{
+	//position: relative;
+	width : 50%;
+	height: 100%;
+	margin: 0 auto;
+	margin-top: 5%;
+	//border: solid 2px blue;
+	min-width: 410px;
+}
+
+/* 제목 */
+h1{
+	//width: 60%;
+	text-align: center;
+	margin-top: 30px;
+	margin-bottom: 50px;
+}
+
+/*키워드 입력 박스 테두리*/
+.inputBox{
+	width : 50%;
+	height : 40px;
+	border: solid 5px green;
+	margin: 0 auto;
+	display: block
+}
+
+/* 키워드 입력 input tag */
+.inputKeyword{
+	width : 95%;
+	height : 90%;
+	border: none;
+	outline: none;
+	margin: 0 auto;
+	display: block;
+}
+
+/*조건 설정 div*/
+.conditionBox{
+	width: 60%;
+	border: solid 2px #B4F4EA;
+	margin : 0 auto;
+	margin-top: 30px;
+	//display: inline-block;
+	padding: 20px;
+}
+
+/*포함 단어 포함 input box */
+.includeKeyword{
+	width: 50%;
+}
+
+/*하단 버튼 박스*/
+.bottomBox{
+	width: 100%;
+	margin-top: 10px
+}
+
+/*언론사 선택 버튼*/
+.selectJournal{
+	width: 30%;
+	border: solid 2px green;
+}
+
+/*검색 버튼*/
+.search_btn{
+	border: solid 2px orange;
+	margin-right: 5%;
+	float: right;
+}
+
+/*언론사 선택 메뉴*/
+.journalTable{
+	width: 60%;
+	//border: solid 2px black;
+	margin: 10px auto;
+	padding: 20px;
+}
+
+/*기사 결과 출력*/
+.articleResultBox{
+	border: solid 1px #F2D8F5;
+	padding: 5px;
+	margin: 3px;
+}
+
+/*기사 제목 a 태그 텍스트*/
+.articleLink{
+	text-decoration: none;
+	color: black;
+}
+
+/*검색 조건 결과 출력 박스*/
+.result_cond{
+	border: solid 1px red;
+	//margin: 0 auto;
+	//display: inline-block;
+}
+
+/*정렬 선택 박스*/
+.article_sort{
+	width: 90px;
+	height: 30px;
+	float: right;
+}
+
+/*페이지 버튼*/
+.pageButton{
+	border: solid 1px blue;
+	color: red;
+	width: 30px;
+	height: 30px;
+	margin: 10px;
+	margin-bottom: 20px;
+}
+
+
