@@ -72,11 +72,6 @@
 			</div>
 			
 			<div class="bottomBox">
-				<!--언론사 선택 버튼
-				<button name="selectJournal" class="selectJournal" onclick="journalClick()">
-				언론사 선택
-				</button>-->
-				
 				<!--검색 버튼 -->
 				<button type="submit" name="search_btn" class="search_btn" >
 				검 색
@@ -97,113 +92,6 @@
 	</div>
 	
 	
-	
-	<!--언론사 목록 출력 박스
-	<table class="journalTable" style="display: none;">
-		<tr>
-			<td>
-				<button name="all_check" id="journal_all" 
-					value="on" class="journalCheckbox" checked="checked">
-				전체 선택
-				</button>
-			</td>
-		</tr>
-		
-		<tr>
-			<td>
-				<input type="checkbox" name="1" class="journalCheckbox" checked="checked">
-				1
-			</td>
-			<td>
-				<input type="checkbox" name="2" class="journalCheckbox" checked="checked">
-				2
-			</td>
-			<td>
-				<input type="checkbox" name="3" class="journalCheckbox" checked="checked">
-				3
-			</td>
-			<td>
-				<input type="checkbox" name="4" class="journalCheckbox" checked="checked">
-				4
-			</td>
-			<td>
-				<input type="checkbox" name="1" class="journalCheckbox" checked="checked">
-				1
-			</td>
-		</tr>
-		
-		<tr>
-			<td>
-				<input type="checkbox" name="donga" class="journalCheckbox" checked="checked">
-				동아일보
-			</td>
-			<td>
-				<input type="checkbox" name="chosun" class="journalCheckbox" checked="checked">
-				조선일보
-			</td>
-			<td>
-				<input type="checkbox" name="joongang" class="journalCheckbox" checked="checked">
-				중앙일보
-			</td>
-			<td>
-				<input type="checkbox" name="kookmin" class="journalCheckbox" checked="checked">
-				국민일보
-			</td>
-			<td>
-				<input type="checkbox" name="newsis" class="journalCheckbox" checked="checked">
-				뉴시스
-			</td>
-		</tr>
-		
-		<tr>
-			<td>
-				<input type="checkbox" name="1" class="journalCheckbox" checked="checked">
-				1
-			</td>
-			<td>
-				<input type="checkbox" name="2" class="journalCheckbox" checked="checked">
-				2
-			</td>
-			<td>
-				<input type="checkbox" name="3" class="journalCheckbox" checked="checked">
-				3
-			</td>
-			<td>
-				<input type="checkbox" name="4" class="journalCheckbox" checked="checked">
-				4
-			</td>
-			<td>
-				<input type="checkbox" name="1" class="journalCheckbox" checked="checked">
-				1
-			</td>
-		</tr>
-		
-		<tr>
-			<td>
-				<input type="checkbox" name="1" class="journalCheckbox" checked="checked">
-				1
-			</td>
-			<td>
-				<input type="checkbox" name="2" class="journalCheckbox" checked="checked">
-				2
-			</td>
-			<td>
-				<input type="checkbox" name="3" class="journalCheckbox" checked="checked">
-				3
-			</td>
-			<td>
-				<input type="checkbox" name="4" class="journalCheckbox" checked="checked">
-				4
-			</td>
-			<td>
-				<input type="checkbox" name="1" class="journalCheckbox" checked="checked">
-				1
-			</td>
-		</tr>
-		
-		
-	</table>-->
-	
 	<div style="height: 40px;">
 		<select name="article_sort" class="article_sort">
 			<option class="young" value="yng">최신순</option>
@@ -223,7 +111,7 @@
 			</a>
 			<form class="article_clean" name="article_clean" method="POST" action="/article">
 			<button type="submit" name="article_clean" value={{ article_list[0][num] }}>
-				view
+				원문 보기
 			</button>
 			<input name="url" style="display: none" value={{ article_list[0][num] }}>
 			</form>
@@ -337,16 +225,15 @@ $(".article_sort").change(function(){
 	var i=Number(num/10 )*10-1;
 	var until = Number(num/10 )*10;
 	
+	//페이지 넘버 id값 변경
 	while(i<until+12){
-		console.log($("#page_"+(i).toString()).length);
-		console.log("id : "+"#page_"+(i).toString());
 		if ( $("#page_"+(i).toString()).length ==1 ){  //해당 태그가 존재하면
 			$("#page_"+(i).toString()).prop("href","/news/"+(i).toString()+("_"+$(this).val()));
-			
 		}
 		i++;
 	}
 	
+	//선택한 정렬로 selected 고정
 	var sort = "{{sort}}";
 	if(sort=="old"){
 		$(".old").attr("selected", "selected");
@@ -356,49 +243,9 @@ $(".article_sort").change(function(){
 		$(".old").prop("selected", false)
 	}
 	
-	//var link = $(".page_").attr("href").split("_")[0];
-	///$(".page_").prop("href", link +"_"+ ($(this).val()));
-	
 	$("#sort_value").text($(this).val()) ;
-	//console.log(link +"_"+ $(this).val());
 });
 
-
-
-//페이지 번호 클릭 이벤트
-/*
-$(".pageButton").click(function(){
-	var page_value = $(this).attr('id');
-	if(page_value == "next"){
-		console.log("1");
-	}else if(page_value == "prev"){
-		console.log("2");
-	}else{
-	    var page_num = Number(page_value.split("_")[1]);
-		console.log("4");
-	}
-	
-
-});
-
-
-
-$('.article_clean').click(function (){
-	var link = $(this).val();
-	alert(link);
-	$.ajax({
-		url:'/article',
-		type: 'POST',
-		dataType: 'json',
-		data: {url: link},
-
-		success : function(data){
-			console.log("success");
-			document.write(response); 
-		}
-		});
-
-});*/
 </script>
 
 

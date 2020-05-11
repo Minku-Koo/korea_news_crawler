@@ -1,4 +1,7 @@
 ﻿
+# made by Koo Minku
+#journal crawling engine
+
 import requests
 from bs4 import BeautifulSoup
 import urllib.request
@@ -10,8 +13,6 @@ from selenium.webdriver.support.ui import WebDriverWait
 import time
 import re
 
-print('_crawl_ file')
-#if __name__ == '_crawl_':
 print('crawl '*5)
 
 options = webdriver.ChromeOptions()
@@ -27,13 +28,11 @@ result_link, result_title = [], []
 # 페이지 개수 계산 함수/ 총 게시글 표시된 부분 xPath (string), 페이지당 기사 개수 (int)
 def pageCount(countPath, article_per_page):
     hg = re.compile('[가-힣 (),]')
-    #time.sleep(1)
+    #기사 총 개수 출력된 부분 찾기
     num =driver.find_element_by_xpath(countPath).text
     num = int(re.sub(hg, '', num))
 
     page_count = int(num/article_per_page) +1
-    print('==**'*5)
-    print(page_count)
     #기사 개수가 (페이지당 기사개수)의 배수 경우 보정
     if num%article_per_page ==0:
         page_count -=1
@@ -52,7 +51,7 @@ class crawling:
         self.result_link, self.result_title, self.result_date = [], [], []
         pass
     
-    #키워드 포함 위치와 포함 단어 체크/ 기사 제목, 기사 태그 종류, 기사 태그 클래스 이름, 기사 url
+    #키워드 포함 위치와 포함 단어 체크/ 기사 제목, 기사 태그 종류, 기사 태그 클래스 이름, 기사 url, 날짜
     def include_check(self, title_text, tag, tagAttr, tagName, url, date):
         head = {'User-Agent': 'Mozilla/5.0', 'referer': url}
         req = urllib.request.Request(url, headers=head)
@@ -62,15 +61,13 @@ class crawling:
         if tagAttr == 'class': 
             article_sub = bs.find(tag, class_=tagName)
             p = re.compile('<li>.*</li>') #쓸데없는 관련기사 제거 위한 정규표현식 / 동아일보
-            article = p.sub('', str(article_sub))  #<li> 태그 전부 삭제
-            print(article)
-            #article_text = re.search('<div.*/div>', html, )
+            
         elif tagAttr == 'id':
             article_sub = bs.find(tag, id=tagName)
             p = re.compile('<li>.*</li>') #쓸데없는 관련기사 제거 위한 정규표현식 / 동아일보
-            article = p.sub('', str(article_sub))  #<li> 태그 전부 삭제
-            print(article)
         
+        article = p.sub('', str(article_sub))  #<li> 태그 전부 삭제
+            
         # 단어 포함 여부 확인 
         success = True
         for word in self.includeWord:
@@ -86,9 +83,8 @@ class crawling:
             self.result_link.append(url)
             self.result_title.append(title_text)
             self.result_date.append(date)
-            print('date input in list : ',date)
             
-        return 
+        return 0
     
     #이미지 포함 여부 확인
     def img_checker(self, url, tagName, tagAttr,className):
@@ -150,10 +146,8 @@ class crawling:
                 date = driver.find_element_by_xpath(date_path).text
                 date = date.replace('(', '').replace(' ', '')
                 date = date[:10]
-                print(date)
                 
                 print(title.text)
-                print(article_url)
             #마지막에 페이지가 10개가 아닐 경우/ 에러
             except(selenium.common.exceptions.NoSuchElementException):
                 print('page article over')
@@ -185,7 +179,6 @@ class crawling:
         driver.get(url)
         driver.implicitly_wait(3) # 로딩까지 3초 기다리기
         
-        #경향신문에만 적용
         #돋보기 클릭
         driver.find_element_by_xpath('//*[@id="main_top_search_btn"]').click()
         #검색창에 검색어 입력
@@ -208,7 +201,6 @@ class crawling:
         # 기간 적용하기 클릭 
         driver.find_element_by_xpath('//*[@id="container"]/div[3]/div[1]/div[2]/ul/li[6]/span[2]/button').click()
 
-        print(driver.current_url) #현재 페이지 URL
 
         #총 검색 기사 개수 구함
         hg = re.compile('[가-힣 (),]')
@@ -292,23 +284,14 @@ class crawling:
         driver.find_element_by_xpath('//*[@id="searchForm"]/div[1]/div[2]/a').click()
         
         #기간 설정- 언제부터 언제까지
-        #value="" title="YYYY-MM-DD"
         date1 = driver.find_element_by_xpath('//*[@id="searchInputStartDate"]')
-        #driver.execute_script('arguments[0].title="'+self.dateStart+'"', date1)
         date1.send_keys(self.dateStart)
         
-
         date2 = driver.find_element_by_xpath('//*[@id="searchInputEndDate"]')
-        #driver.execute_script('arguments[0].title="'+self.dateEnd+'"', date2)
         date2.send_keys(self.dateEnd)
         
         #상세검색 검색 클릭
         driver.find_element_by_xpath('//*[@id="detailSearchAtricle"]').click()
-
-        # 기간 적용하기 클릭  - 경향신문꺼
-        #driver.find_element_by_xpath('//*[@id="container"]/div[3]/div[1]/div[2]/ul/li[6]/span[2]/button').click()
-
-        print(driver.current_url) #현재 페이지 URL
 
         page_count = pageCount('//*[@id="searchTotalItemCnt"]', 10)
         #페이지 계산해서 끝까지 keep going
@@ -318,7 +301,6 @@ class crawling:
             
         time.sleep(2)
         print('Article Close')
-        #driver.close()
         return [self.result_link, self.result_title, self.result_date]
 
 
@@ -331,32 +313,19 @@ class crawling:
             date_path = '//*[@id="contents"]/div[3]/div/div['+str(r)+']/div[2]/p[1]/span'
             
             try:
-                #title = driver.find_element_by_xpath(path)
-                print("--/---"*10)
                 title_tag = driver.find_element_by_xpath(path).find_element_by_class_name('tit')
-                print("// :",title_tag.text)
-                #title_e = title_tag.find_element_by_class_name('tit')
                 title = title_tag.find_element_by_tag_name('a')
-                #date = driver.find_element_by_xpath(date_path).text
                 
-                
-                print('=='*10)
-                print("w :",title.text)
                 title_text = title.text #기사 제목
                 date = title_tag.text[-17:-6]
-                print('date : ',date)
-                print('jk')
                 article_url = title.get_attribute("href") #기사 링크
-                print(article_url)
             #마지막에 페이지가 10개가 아닐 경우/ 에러
             except(selenium.common.exceptions.NoSuchElementException):
                 print('page article over')
-                print('where..')
                 return
                 
             self.conditionChecker(title_text, article_url, date, 'div','class', 'article_txt','div', 'class','articlePhotoC')
             
-        
         nb=0  #동아일보 특성 상, 10 이상 페이지부터 태그 내용 변경 -- 보정 위해 nb 삽입
         if page >10:
             nb =1
@@ -366,15 +335,10 @@ class crawling:
             try:
                 print("click next")
                 btn =driver.find_element_by_class_name('right')
-                time.sleep(0.8)
+                time.sleep(0.5)
                 btn =driver.find_element_by_xpath('//*[@title="다음"]')
-                #//*[@id="contents"]/div[3]/div[2]/a[11]
-                #find_element_by_class_name('page').
-                time.sleep(0.8)
-                #btn.click() 
+                time.sleep(0.5)
                 print(btn.text)
-                #btn = WebDriverWait(driver, 15).until(
-                #expected_conditions.element_to_be_clickable((By.CLASS_NAME, 'right')))  
                 
                 btn.click()
             except(selenium.common.exceptions.NoSuchElementException):
@@ -400,20 +364,13 @@ class crawling:
         driver.implicitly_wait(3) # 로딩까지 기다리기
         
         #검색창 열기
-        print('--')
-        #driver.find_element_by_xpath('//*[@id="search_form"]/div/a[3]/span').click()
-        #//*[@id="search_form"]/div/a[3]/span
-        #icon_com icon_search
         time.sleep(1)
         btn = driver.find_element_by_class_name('icon_com.icon_search')
         btn.click()
         driver.implicitly_wait(3)
-        #time.sleep(2)
         
         #검색창에 검색어 입력
-        #time.sleep(2)
         elm = driver.find_element_by_xpath("""//*[@id="query"]""")
-        print(self.search)
         elm.send_keys(self.search)
         #돋보기 클릭
         driver.find_element_by_xpath('//*[@id="search_form"]/div/div/input').click()
@@ -426,43 +383,25 @@ class crawling:
         driver.find_element_by_xpath('//*[@id="d_term_5"]').click()
         time.sleep(1)
         #기간 설정- 언제부터 언제까지
-        #value="" title="YYYY-MM-DD"
         date1 = driver.find_element_by_xpath('//*[@id="v1"]')
-        #driver.execute_script('arguments[0].title="'+self.dateStart+'"', date1)
         date1.send_keys(self.dateStart)
         
         date2 = driver.find_element_by_xpath('//*[@id="v2"]')
-        #driver.execute_script('arguments[0].title="'+self.dateEnd+'"', date2)
         date2.send_keys(self.dateEnd)
         time.sleep(1)
         
-        print('상세검색-')
         #상세검색 검색 클릭 
         btn = driver.find_element_by_xpath('//*[@id="search_form_detail"]/div[2]/input[2]')
         btn.click()
         driver.implicitly_wait(2)
         time.sleep(1)
         
-        print('더보기-')
         # 더보기 클릭 
-        #btn1 = driver.find_element_by_xpath('//*[@id="contents"]/div[3]/div/p')
         driver.execute_script("window.scrollTo(0, 800);")
-        #driver.find_element_by_class_name('more02').find_element_by_tag_name('a').click()
-        #driver.find_element_by_xpath('//*[@id="contents"]/div[3]/div/p/a')
-        #time.sleep(1)
         btn = driver.find_element_by_class_name('more02')
-        #btn = driver.find_element_by_xpath('//*[@id="contents"]/div[3]/div/p/a')
-        #//*[@id="contents"]/div[4]/div/p/a
-        #contents > div:nth-child(8) > div > p
-        #//*[@id="contents"]/div[3]/div/p
-        #/html/body/div[2]/div[3]/div[2]/div[3]/div/p
-        #btn = driver.find_element_by_xpath('/html/body/div[2]/div[3]/div[2]/div[3]/div/p/a')
         print(btn.text)
         btn.click()
         time.sleep(1)
-        
-        #driver.implicitly_wait(2)
-        
 
         page_count = pageCount('//*[@id="contents"]/div[3]/div/h2/span[1]', 15)
         
@@ -470,20 +409,18 @@ class crawling:
         for i in range(1,page_count+1):
             self.donga_crawl(i)
             print('=*='*15)
-            print('donga')
             print(i)
             
         time.sleep(1)
         print('Article Close')
-        #driver.close()
         
         return [self.result_link, self.result_title, self.result_date]
 
-    #페이지 별로 기사 제목 출력
+    #페이지 별로 기사 제목 출력, YTN 미완성
     def ytn_crawl(self, page, num):
         print('ytn')
         '''
-        ytn 싯팔새기들 인코딩에러뜸
+        ytn  인코딩에러뜸
         '''
         if num <=5:
             for r in range(1,num+1): #ytn은 한 페이지 당 20개의 기사
@@ -575,13 +512,11 @@ class crawling:
         radio.click()
         #기간 설정- 언제부터 언제까지
         #value="" title="YYYY-MM-DD"
-        #date1 = driver.find_element_by_xpath('//*[@id="dsrchBox"]/ul/li[1]/input[3]')
         date1 = driver.find_element_by_xpath('//*[@title="검색기간시작일"]')
         sdate = self.dateStart.replace('.','')
         print(sdate)
         driver.execute_script('arguments[0].value='+sdate, date1)
         
-        #date2 = driver.find_element_by_name('//*[@id="dsrchBox"]/ul/li[1]/input[4]')
         date2 = driver.find_element_by_xpath('//*[@title="검색기간종료일"]')
         edate = self.dateEnd.replace('.','')
         driver.execute_script('arguments[0].value='+edate, date2)
@@ -591,21 +526,15 @@ class crawling:
             driver.find_element_by_xpath('//*[@id="target1"]').click()
             driver.implicitly_wait(5)
 
-        #driver.switch_to_frame("sList") 
         # 상세 검색 다시 검색  
         driver.implicitly_wait(5)
         time.sleep(1)
         driver.find_element_by_xpath('//*[@id="dsrchBox"]/li[2]/ul/li[3]/input').click()
         driver.implicitly_wait(5)
         print(driver.current_url) #현재 페이지 URL
-        print('switch frame')
-        #driver.switch_to_frame("sList") 
-        #driver.execute_script("window.scrollTo(0, 500);")
         driver.switch_to_frame("sList") 
         print('switch to frame')
         number= driver.find_element_by_xpath('//*[@id="main"]/div[1]/ul/li[1]/b').text
-        #number= str(driver.find_element_by_xpath('//*[@id="cnt_1"]'))
-        print(str(number))
         number =  str(number).replace(',', '').replace('(', '').replace(')', '')
         print(number)
         num = int(number)
@@ -615,7 +544,6 @@ class crawling:
             # n개 미만일 경우 더보기 클릭 없음
             driver.find_element_by_xpath('//*[@id="main"]/div[1]/span/a').click()
             driver.implicitly_wait(5)
-            #driver.switch_to_frame("sList")
         
         #page_count 따라서 구분짓기
         #페이지 계산해서 끝까지 keep going
@@ -625,7 +553,6 @@ class crawling:
             
         time.sleep(2)
         print('Article Close')
-        #driver.close()
         return [self.result_link, self.result_title]
 
 
